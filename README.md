@@ -1,7 +1,7 @@
 # 🧠 AI Prompt Studio – Agency Management Suite
 
 A powerful, all‑in‑one prompt editor for building full‑featured agency management platforms.  
-**Live demo:** [your-site-url] (replace with your GitHub Pages URL)
+**Live demo:** [(https://diverseinc1.github.io/ai-prompt-studio/)] (https://github.com/Diverseinc1/ai-prompt-studio)
 
 ![Screenshot](https://via.placeholder.com/800x400?text=AI+Prompt+Studio+Preview)  
 *(Add a real screenshot later for best results)*

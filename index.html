@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>AI Prompt Studio | Cloud Sync · PDF Export</title>
+  <!-- Tailwind + Font Awesome + Google Fonts (Inter) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', system-ui, -apple-system, sans-serif; scroll-behavior: smooth; }
+    
+    /* Light theme (default) - bright, high contrast */
+    body {
+      background: linear-gradient(135deg, #f1f5f9 0%, #e6edf5 100%);
+      transition: background 0.3s, color 0.2s;
+    }
+    
+    /* Glass card - light theme: semi-transparent but very light */
+    .glass-premium {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(0, 0, 0, 0.06);
+      box-shadow: 0 4px 16px -8px rgba(0, 0, 0, 0.08);
+    }
+    
+    /* Dark theme - untouched, perfect */
+    .dark body {
+      background: radial-gradient(ellipse at 30% 40%, #0a0f1e 0%, #020617 100%);
+    }
+    .dark .glass-premium {
+      background: rgba(18, 28, 45, 0.94);
+      border-color: rgba(255, 255, 255, 0.1);
+      box-shadow: 0 8px 20px -8px rgba(0, 0, 0, 0.5);
+    }
+    
+    /* ===== LIGHT THEME FIX: textareas, inputs, selects ===== */
+    textarea, select, input {
+      transition: all 0.15s;
+    }
+    textarea, select, input {
+      background: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    .dark textarea, .dark select, .dark input {
+      background: #1e293b !important;
+      color: #f1f5f9 !important;
+      border-color: #475569 !important;
+    }
+    
+    /* Focus states */
+    textarea:focus, select:focus, input:focus {
+      outline: none;
+      ring: 2px solid #6366f1;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99,102,241,0.3);
+    }
+    
+    /* Placeholder light */
+    ::placeholder {
+      color: #94a3b8;
+      opacity: 1;
+    }
+    .dark ::placeholder {
+      color: #64748b;
+    }
+    
+    /* Dropdown options */
+    select option {
+      background: white;
+      color: #0f172a;
+    }
+    .dark select option {
+      background: #1e293b;
+      color: #f1f5f9;
+    }
+    
+    /* Master card buttons (already fixed) */
+    .master-btn {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    .master-btn:hover {
+      background-color: #f8fafc !important;
+    }
+    .dark .master-btn {
+      background-color: #334155 !important;
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+    }
+    .dark .master-btn:hover {
+      background-color: #475569 !important;
+    }
+    
+    /* Fixed buttons: Reset Modules, Theme, Export JSON, Save/Load, PDF, Cloud */
+    #resetModulesBtn, #darkModeToggle, #exportJsonBtn, #saveToStorageBtn, #loadFromStorageBtn, #printPdfBtn, #syncToCloudBtn, #loadFromCloudBtn {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    #resetModulesBtn:hover, #darkModeToggle:hover, #exportJsonBtn:hover, #saveToStorageBtn:hover, #loadFromStorageBtn:hover, #printPdfBtn:hover, #syncToCloudBtn:hover, #loadFromCloudBtn:hover {
+      background-color: #f8fafc !important;
+    }
+    .dark #resetModulesBtn, .dark #darkModeToggle, .dark #exportJsonBtn, .dark #saveToStorageBtn, .dark #loadFromStorageBtn, .dark #printPdfBtn, .dark #syncToCloudBtn, .dark #loadFromCloudBtn {
+      background-color: #334155 !important;
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+    }
+    .dark #resetModulesBtn:hover, .dark #darkModeToggle:hover, .dark #exportJsonBtn:hover, .dark #saveToStorageBtn:hover, .dark #loadFromStorageBtn:hover, .dark #printPdfBtn:hover, .dark #syncToCloudBtn:hover, .dark #loadFromCloudBtn:hover {
+      background-color: #475569 !important;
+    }
+    
+    /* "editable core spec" badge */
+    .badge-light {
+      background-color: #e2e8f0 !important;
+      color: #0f172a !important;
+      border: none !important;
+    }
+    .dark .badge-light {
+      background-color: #1e293b !important;
+      color: #cbd5e1 !important;
+    }
+    
+    /* "24 modules visible" pill */
+    .pill-light {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #cbd5e1 !important;
+    }
+    .dark .pill-light {
+      background-color: #1e293b !important;
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+    }
+    
+    /* Copy buttons inside cards */
+    .copy-single {
+      background-color: #ffffff !important;
+      color: #0f172a !important;
+      border: 1px solid #e2e8f0 !important;
+    }
+    .copy-single:hover {
+      background-color: #f1f5f9 !important;
+    }
+    .dark .copy-single {
+      background-color: #334155 !important;
+      color: #e2e8f0 !important;
+      border-color: #475569 !important;
+    }
+    .dark .copy-single:hover {
+      background-color: #475569 !important;
+    }
+    
+    /* Card inner backgrounds */
+    .bg-white\/50 {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+    }
+    .dark .bg-white\/50 {
+      background-color: rgba(30, 41, 59, 0.4) !important;
+    }
+    
+    /* Text colors - high contrast in light */
+    .text-gray-600 { color: #475569 !important; }
+    .text-gray-500 { color: #64748b !important; }
+    .text-gray-700 { color: #1e293b !important; }
+    .text-gray-800 { color: #0f172a !important; }
+    .dark .text-gray-600 { color: #cbd5e1 !important; }
+    .dark .text-gray-500 { color: #94a3b8 !important; }
+    .dark .text-gray-700 { color: #e2e8f0 !important; }
+    .dark .text-gray-800 { color: #f1f5f9 !important; }
+    
+    /* Borders */
+    .border-gray-200 { border-color: #e2e8f0 !important; }
+    .dark .border-gray-200 { border-color: #334155 !important; }
+    .border-gray-300 { border-color: #cbd5e1 !important; }
+    .dark .border-gray-300 { border-color: #475569 !important; }
+    
+    /* Card hover */
+    .card-elegant {
+      transition: all 0.25s ease;
+    }
+    .card-elegant:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 30px -12px rgba(0, 0, 0, 0.15);
+    }
+    
+    /* Toast */
+    .toast-modern {
+      position: fixed;
+      bottom: 28px;
+      right: 28px;
+      z-index: 9999;
+      backdrop-filter: blur(20px);
+    }
+    
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb { background: #818cf8; border-radius: 10px; }
+    .dark ::-webkit-scrollbar-track { background: #1e293b; }
+    .dark ::-webkit-scrollbar-thumb { background: #6366f1; }
+    
+    .badge-soft {
+      background: rgba(99,102,241,0.12);
+      border-radius: 60px;
+      padding: 0.2rem 0.85rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+    .gradient-text {
+      background: linear-gradient(120deg, #4f46e5, #a855f7, #ec4899);
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+  </style>
+</head>
+<body class="antialiased">
+
+  <div class="max-w-7xl mx-auto px-5 sm:px-7 lg:px-9 py-9">
+    <!-- Toast Notification -->
+    <div id="toastMsg" class="toast-modern hidden glass-premium rounded-2xl py-3 px-5 flex items-center gap-3 shadow-2xl border border-white/40 dark:border-white/10">
+      <i class="fas fa-check-circle text-emerald-500 text-lg"></i>
+      <span id="toastText" class="text-sm font-medium text-gray-800 dark:text-gray-100">Copied!</span>
+    </div>
+
+    <!-- Header -->
+    <div class="flex flex-wrap justify-between items-center gap-5 mb-9">
+      <div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <h1 class="text-5xl md:text-6xl font-black tracking-tight"><span class="gradient-text">AI Prompt Studio</span></h1>
+          <span class="badge-soft text-indigo-700 dark:text-indigo-200 border border-indigo-200/40"><i class="fas fa-crown mr-1 text-amber-500"></i> Agency v2</span>
+        </div>
+        <p class="text-gray-700 dark:text-gray-300 text-sm max-w-xl mt-1 font-medium">Elite modular prompts for full-scale agency management. Filter, customize, export, PDF, and cloud sync.</p>
+      </div>
+      <!-- Theme button -->
+      <button id="darkModeToggle" class="rounded-full px-5 py-2.5 text-sm font-semibold shadow-md flex items-center gap-2 hover:scale-105 transition-all">
+        <i class="fas fa-sun dark:hidden text-amber-500 text-base"></i>
+        <i class="fas fa-moon hidden dark:inline text-indigo-300 text-base"></i>
+        <span class="text-gray-700 dark:text-gray-200">Theme</span>
+      </button>
+    </div>
+
+    <!-- Business Context Panel -->
+    <div class="glass-premium rounded-2xl p-6 mb-10 flex flex-wrap items-center justify-between gap-5 shadow-md">
+      <div class="flex items-center gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-md"><i class="fas fa-brain text-white text-xl"></i></div>
+        <div><h2 class="font-extrabold text-xl text-gray-800 dark:text-white">Business Intelligence</h2><p class="text-xs text-gray-600 dark:text-gray-400">adaptive prompts per vertical</p></div>
+      </div>
+      <div class="flex gap-3 flex-wrap">
+        <select id="businessSelect" class="bg-white dark:bg-slate-800 border border-gray-300 dark:border-gray-600 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm focus:ring-2 focus:ring-indigo-400 text-gray-800 dark:text-gray-100">
+          <option value="all">🏢 All Agencies (General)</option>
+          <option value="marketing">📈 Digital Marketing</option>
+          <option value="dev">💻 Software / Dev Agency</option>
+          <option value="creative">🎨 Creative / Design Studio</option>
+          <option value="consulting">📊 Consulting / Advisory</option>
+          <option value="realestate">🏡 Real Estate Agency</option>
+          <option value="ecommerce">🛒 E‑commerce Agency</option>
+          <option value="it">⚙️ IT / MSP</option>
+        </select>
+        <button id="applyBizBtn" class="bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white px-6 py-2.5 rounded-xl text-sm font-bold shadow-md flex items-center gap-2 transition-all"><i class="fas fa-sliders-h"></i> Apply Context</button>
+      </div>
+    </div>
+
+    <!-- Master prompt card -->
+    <div class="glass-premium rounded-2xl mb-10 overflow-hidden shadow-md">
+      <div class="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex flex-wrap justify-between items-center gap-3 bg-white/50 dark:bg-black/20">
+        <div class="flex items-center gap-2">
+          <i class="fas fa-scroll text-indigo-600 text-xl"></i>
+          <h2 class="font-bold text-2xl text-gray-800 dark:text-white">Master Blueprint</h2>
+          <span class="text-[10px] font-mono badge-light rounded-full px-2 py-0.5">editable core spec</span>
+        </div>
+        <div class="flex gap-2">
+          <button id="copyMasterBtn" class="master-btn px-4 py-1.5 rounded-lg text-sm font-semibold shadow-sm"><i class="far fa-copy"></i> Copy</button>
+          <button id="resetMasterBtn" class="master-btn px-4 py-1.5 rounded-lg text-sm font-semibold shadow-sm"><i class="fas fa-undo-alt"></i> Reset</button>
+        </div>
+      </div>
+      <textarea id="masterPrompt" rows="9" class="w-full p-6 font-mono text-sm resize-y bg-white dark:bg-slate-800 border-0 focus:ring-0 leading-relaxed text-gray-800 dark:text-gray-200"></textarea>
+    </div>
+
+    <!-- toolbar -->
+    <div class="flex flex-wrap gap-4 items-center justify-between mb-7">
+      <div class="flex gap-3 flex-wrap items-center">
+        <div class="relative"><i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 text-sm"></i><input type="text" id="searchInput" placeholder="Search modules..." class="pl-10 pr-5 py-2.5 rounded-xl border border-gray-300 dark:border-gray-600 bg-white dark:bg-slate-800 w-72 text-sm shadow-sm text-gray-800 dark:text-gray-100"></div>
+        <div class="pill-light rounded-full px-4 py-1.5 text-sm font-medium shadow-sm"><span id="moduleCountSpan" class="font-bold text-indigo-600 dark:text-indigo-400">24</span> <span class="text-gray-600 dark:text-gray-300">modules visible</span></div>
+        <button id="clearSearchBtn" class="text-indigo-700 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700 rounded-full px-4 py-1.5 text-xs font-semibold hover:bg-indigo-50 dark:hover:bg-indigo-950/50 transition">Clear</button>
+      </div>
+      <div class="flex gap-2 flex-wrap">
+        <button id="copyFilteredBtn" class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md flex items-center gap-2 transition-all hover:shadow-lg"><i class="fas fa-copy"></i> Copy Filtered</button>
+        <button id="exportJsonBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all"><i class="fas fa-download"></i> Export JSON</button>
+        <button id="saveToStorageBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all"><i class="fas fa-save"></i> Save to Browser</button>
+        <button id="loadFromStorageBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all"><i class="fas fa-folder-open"></i> Load from Browser</button>
+        <button id="printPdfBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all"><i class="fas fa-print"></i> Download PDF</button>
+        <button id="syncToCloudBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all"><i class="fas fa-cloud-upload-alt"></i> Sync to Cloud</button>
+        <button id="loadFromCloudBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all"><i class="fas fa-cloud-download-alt"></i> Load from Cloud</button>
+        <button id="resetModulesBtn" class="px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm transition-all"><i class="fas fa-sync-alt"></i> Reset Modules</button>
+      </div>
+    </div>
+
+    <!-- Modules Grid -->
+    <div id="modulesGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7"></div>
+
+    <!-- Quick Helpers -->
+    <div class="mt-12 glass-premium rounded-2xl p-6">
+      <h3 class="font-black text-xl mb-5 flex items-center gap-3 text-gray-800 dark:text-white"><i class="fas fa-zap text-amber-500 text-2xl"></i> Instant AI Helpers</h3>
+      <div class="grid md:grid-cols-3 gap-5">
+        <div class="bg-white/80 dark:bg-slate-800/50 rounded-xl p-4 backdrop-blur-sm border border-gray-200 dark:border-gray-700"><label class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">TechStack</label><textarea id="quickTech" rows="3" class="w-full rounded-xl border border-gray-300 dark:border-gray-600 p-2 text-xs font-mono mt-2 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100"></textarea><button id="copyTechBtn" class="mt-2 text-indigo-700 dark:text-indigo-400 text-xs font-semibold hover:underline"><i class="far fa-copy"></i> Copy</button></div>
+        <div class="bg-white/80 dark:bg-slate-800/50 rounded-xl p-4 backdrop-blur-sm border border-gray-200 dark:border-gray-700"><label class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Security Brief</label><textarea id="quickSec" rows="3" class="w-full rounded-xl border border-gray-300 dark:border-gray-600 p-2 text-xs font-mono mt-2 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100"></textarea><button id="copySecBtn" class="mt-2 text-indigo-700 dark:text-indigo-400 text-xs font-semibold hover:underline"><i class="far fa-copy"></i> Copy</button></div>
+        <div class="bg-white/80 dark:bg-slate-800/50 rounded-xl p-4 backdrop-blur-sm border border-gray-200 dark:border-gray-700"><label class="text-xs font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">AI Lead Scoring</label><textarea id="quickAI" rows="3" class="w-full rounded-xl border border-gray-300 dark:border-gray-600 p-2 text-xs font-mono mt-2 bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-100"></textarea><button id="copyAiBtn" class="mt-2 text-indigo-700 dark:text-indigo-400 text-xs font-semibold hover:underline"><i class="far fa-copy"></i> Copy</button></div>
+      </div>
+    </div>
+    <footer class="text-center text-xs text-gray-500 dark:text-gray-400 border-t border-gray-200 dark:border-gray-800 mt-10 pt-6 pb-3">✨ Fully customizable · One‑click copy · Export JSON · PDF · Cloud sync (Firebase) · Save/Load to browser</footer>
+  </div>
+
+  <script>
+    // MODULE DATABASE (24 modules)
+    const BASE_MODULES = [
+      { title: "🔐 User System & Passkeys", icon: "fas fa-user-lock", categories: ["all","marketing","dev","creative","consulting","realestate","ecommerce","it"], prompt: "Implement Passkeys (WebAuthn), MFA (TOTP/SMS), RBAC, session management, device tracking, JWT rotation with NestJS guards. Provide frontend WebAuthn registration flow and secure session handling." },
+      { title: "🏢 Workspace & Multi-tenant", icon: "fas fa-building", categories: ["all","marketing","dev","creative","consulting","realestate","ecommerce","it"], prompt: "Single workspace architecture, extensible to multi-tenant. Custom domain, branding JSONB, member invites, owner transfer. Middleware for workspace isolation." },
+      { title: "🎯 AI Lead Scoring", icon: "fas fa-chart-simple", categories: ["all","marketing","consulting","realestate","ecommerce","it"], prompt: "Build AI lead scoring microservice (FastAPI + scikit-learn). Compute lead_score & conversion_probability from email engagement, source, web activity. Add nurturing sequences." },
+      { title: "🏠 Client Portal", icon: "fas fa-users", categories: ["all","marketing","dev","creative","consulting","realestate","ecommerce","it"], prompt: "Branded client portal: project views, file uploads, invoices, payments, support tickets. Real-time presence, approval widgets, SSO." },
+      { title: "📇 CRM + Predictive Insights", icon: "fas fa-address-card", categories: ["all","marketing","consulting","realestate","ecommerce","it"], prompt: "360 CRM: contact profiles, communication logs, LTV, churn_risk_score (AI). Upsell detection, at-risk alerts, full-text search." },
+      { title: "📁 Clients & Projects", icon: "fas fa-folder-open", categories: ["all"], prompt: "Unlimited clients & projects with lifecycle (plan/active/archived). Custom fields, budget tracking, methodology (Agile/Waterfall)." },
+      { title: "🛠️ Service Management", icon: "fas fa-cubes", categories: ["all"], prompt: "Service catalog (productized/custom). Dynamic pricing, workflow JSONB. Link services to invoices, subscriptions, proposals." },
+      { title: "✅ Real-time Task Management", icon: "fas fa-tasks", categories: ["all","dev","creative","it"], prompt: "Agile/Kanban + Gantt charts with Yjs CRDTs real-time collaboration. Task dependencies, estimates, subtasks, native WebSocket sync." },
+      { title: "💰 Invoicing & Subscriptions", icon: "fas fa-file-invoice-dollar", categories: ["all","marketing","consulting","ecommerce"], prompt: "Automated invoicing, subscriptions with proration/dunning. Stripe/PayPal abstraction, overdue reminders, PDF invoices." },
+      { title: "📄 Proposals + eSign", icon: "fas fa-file-signature", categories: ["all","marketing","creative","consulting"], prompt: "AI proposal builder with templates, placeholders, e-signature (PandaDoc). Status tracking & audit trail." },
+      { title: "🎫 AI Ticketing System", icon: "fas fa-headset", categories: ["all"], prompt: "Intelligent ticketing: AI priority/category classification, suggested responses, routing. SLA tracking, internal notes." },
+      { title: "🎨 Custom Branding", icon: "fas fa-palette", categories: ["all"], prompt: "White-label: logos, color schemes, fonts, CSS overrides applied to portal, invoices, emails." },
+      { title: "⏱️ Time Tracking", icon: "fas fa-stopwatch", categories: ["all","dev","creative","it"], prompt: "Manual + timer entries, billable toggle, reports per project/user. Invoicing integration from unbilled time." },
+      { title: "📎 File Feedback & Approval", icon: "fas fa-comment-dots", categories: ["all","creative","marketing"], prompt: "File versioning, annotations on PDF/images, threaded comments. Approval workflow + webhook triggers." },
+      { title: "📝 Custom Forms Builder", icon: "fas fa-wpforms", categories: ["all"], prompt: "Drag-drop form builder (JSON schema). Map submissions to leads/clients. Conditional logic, webhooks." },
+      { title: "💬 AI Conversation Summaries", icon: "fas fa-comments", categories: ["all"], prompt: "Real-time messaging with AI summaries (bullet recap). Slack mirroring, WebSockets, presence." },
+      { title: "🌐 Custom Domain & Email", icon: "fas fa-globe", categories: ["all"], prompt: "Custom CNAME, SSL, branded email (SPF/DKIM). Routing for invoice@, support@." },
+      { title: "⚡ Slack Deep Integration", icon: "fab fa-slack", categories: ["all","dev","it","marketing"], prompt: "Slack slash commands, interactive buttons, notifications, Block Kit. OAuth flow, two-way actions." },
+      { title: "📜 Custom Scripts (Sandbox)", icon: "fas fa-code", categories: ["all","dev","it"], prompt: "Sandboxed Python/JS execution (gVisor). Trigger via webhook/schedule, audit logs." },
+      { title: "🔑 API Key Management", icon: "fas fa-key", categories: ["all","dev","it"], prompt: "API keys with scoped permissions, rate limiting, OpenAPI spec." },
+      { title: "📡 Webhooks", icon: "fas fa-webhook", categories: ["all"], prompt: "Outgoing webhooks on events with retry, idempotency, delivery logs." },
+      { title: "🧩 App Embeds", icon: "fas fa-puzzle-piece", categories: ["all"], prompt: "Embed external tools via iframe (Calendly, Miro). Role-based visibility." },
+      { title: "🗂️ Sidebar Customization", icon: "fas fa-bars", categories: ["all"], prompt: "Role-aware sidebar editor, drag-drop reorder, save config to workspace." },
+      { title: "📊 Analytics & AI Anomaly", icon: "fas fa-chart-pie", categories: ["all","marketing","consulting","ecommerce"], prompt: "Role-based dashboards, financial KPIs, AI anomaly detection (budget overruns, churn). Export CSV/PDF." }
+    ];
+
+    const BUSINESS_SUFFIX = {
+      marketing: "\n[Marketing Agency] + Include campaign ROI dashboards, ad spend tracking, client attribution, Meta/Google Ads integration.",
+      dev: "\n[Dev Agency] + Focus: sprint planning, GitHub/GitLab integration, CI/CD metrics, code review workflows.",
+      creative: "\n[Creative Agency] + Emphasis: design reviews, file proofs, version approvals, asset library.",
+      consulting: "\n[Consulting] + Add resource planning, timesheet approvals, expense tracking, client deliverables matrix.",
+      realestate: "\n[Real Estate] + Include property listings integration, lead source tracking, commission splits.",
+      ecommerce: "\n[E‑commerce] + Focus on product feed sync, order management, returns handling, conversion analytics.",
+      it: "\n[IT/MSP] + Include asset management, patch scheduling, SLA monitoring, remote access tools.",
+      all: ""
+    };
+
+    let modules = JSON.parse(JSON.stringify(BASE_MODULES));
+    let currentBusiness = "all";
+    let currentSearch = "";
+    const gridContainer = document.getElementById("modulesGrid");
+    const masterTA = document.getElementById("masterPrompt");
+    const searchInput = document.getElementById("searchInput");
+    const moduleCountSpan = document.getElementById("moduleCountSpan");
+    const businessSelect = document.getElementById("businessSelect");
+    const applyBizBtn = document.getElementById("applyBizBtn");
+    const copyFilteredBtn = document.getElementById("copyFilteredBtn");
+    const exportBtn = document.getElementById("exportJsonBtn");
+    const resetModulesBtn = document.getElementById("resetModulesBtn");
+    const clearSearchBtn = document.getElementById("clearSearchBtn");
+    const copyMasterBtn = document.getElementById("copyMasterBtn");
+    const resetMasterBtn = document.getElementById("resetMasterBtn");
+    const darkToggle = document.getElementById("darkModeToggle");
+    const saveStorageBtn = document.getElementById("saveToStorageBtn");
+    const loadStorageBtn = document.getElementById("loadFromStorageBtn");
+    const printPdfBtn = document.getElementById("printPdfBtn");
+
+    // Quick helpers elements
+    const quickTech = document.getElementById("quickTech");
+    const quickSec = document.getElementById("quickSec");
+    const quickAI = document.getElementById("quickAI");
+
+    // Toast helper
+    function showToast(msg) {
+      const toast = document.getElementById("toastMsg");
+      const textSpan = document.getElementById("toastText");
+      textSpan.innerText = msg;
+      toast.classList.remove("hidden");
+      setTimeout(() => toast.classList.add("hidden"), 2100);
+    }
+
+    async function copyToClipboard(text, btnElem) {
+      try {
+        await navigator.clipboard.writeText(text);
+        showToast("✓ Copied to clipboard");
+        if (btnElem) {
+          const original = btnElem.innerHTML;
+          btnElem.innerHTML = '<i class="fas fa-check"></i> Done';
+          setTimeout(() => btnElem.innerHTML = original, 1100);
+        }
+      } catch { showToast("⚠️ Manual copy required"); }
+    }
+
+    // Save all user data to localStorage
+    function saveToLocalStorage() {
+      const modulePrompts = modules.map(mod => mod.prompt);
+      const data = {
+        masterPrompt: masterTA.value,
+        modulePrompts: modulePrompts,
+        quickHelpers: {
+          tech: quickTech.value,
+          security: quickSec.value,
+          aiScoring: quickAI.value
+        },
+        businessContext: businessSelect.value,
+        darkMode: document.documentElement.classList.contains("dark")
+      };
+      localStorage.setItem("ai_prompt_studio_data", JSON.stringify(data));
+      showToast("💾 All data saved to browser!");
+    }
+
+    // Load user data from localStorage
+    function loadFromLocalStorage() {
+      const raw = localStorage.getItem("ai_prompt_studio_data");
+      if (!raw) {
+        showToast("No saved data found. Use 'Save to Browser' first.");
+        return;
+      }
+      try {
+        const data = JSON.parse(raw);
+        if (data.masterPrompt) masterTA.value = data.masterPrompt;
+        if (data.modulePrompts && data.modulePrompts.length === modules.length) {
+          modules.forEach((mod, idx) => {
+            mod.prompt = data.modulePrompts[idx];
+          });
+        }
+        if (data.quickHelpers) {
+          quickTech.value = data.quickHelpers.tech;
+          quickSec.value = data.quickHelpers.security;
+          quickAI.value = data.quickHelpers.aiScoring;
+        }
+        if (data.businessContext) {
+          businessSelect.value = data.businessContext;
+          currentBusiness = data.businessContext;
+        }
+        if (data.darkMode !== undefined) {
+          if (data.darkMode) document.documentElement.classList.add("dark");
+          else document.documentElement.classList.remove("dark");
+        }
+        renderGrid();
+        showToast("📂 Data loaded from browser!");
+      } catch (e) {
+        showToast("Error loading saved data");
+      }
+    }
+
+    // Apply business context (append suffix)
+    function applyBusinessContext() {
+      const biz = businessSelect.value;
+      const suffix = BUSINESS_SUFFIX[biz] || "";
+      if (!suffix && biz !== "all") { showToast("No additional context for this vertical"); return; }
+      modules = modules.map(mod => {
+        if (suffix && !mod.prompt.includes(suffix.trim().substring(0, 30))) {
+          let newPrompt = mod.prompt + (mod.prompt.endsWith(".") ? " " : ". ") + suffix;
+          return { ...mod, prompt: newPrompt };
+        }
+        return mod;
+      });
+      currentBusiness = biz;
+      renderGrid();
+      showToast(`Applied: ${businessSelect.options[businessSelect.selectedIndex]?.text}`);
+    }
+
+    function resetModules() {
+      modules = JSON.parse(JSON.stringify(BASE_MODULES));
+      currentBusiness = "all";
+      businessSelect.value = "all";
+      renderGrid();
+      showToast("All modules restored to original prompts");
+    }
+
+    function renderGrid() {
+      const filtered = modules.filter(mod => {
+        const catMatch = currentBusiness === "all" || mod.categories.includes(currentBusiness);
+        const searchMatch = currentSearch === "" || mod.title.toLowerCase().includes(currentSearch.toLowerCase()) || mod.prompt.toLowerCase().includes(currentSearch.toLowerCase());
+        return catMatch && searchMatch;
+      });
+      moduleCountSpan.innerText = filtered.length;
+      gridContainer.innerHTML = "";
+      filtered.forEach((mod, idx) => {
+        const globalIdx = modules.findIndex(m => m.title === mod.title);
+        const card = document.createElement("div");
+        card.className = "glass-premium rounded-xl overflow-hidden flex flex-col card-elegant";
+        card.innerHTML = `
+          <div class="flex justify-between items-center px-5 py-3 border-b border-gray-200 dark:border-gray-700">
+            <div class="flex items-center gap-3"><i class="${mod.icon} text-indigo-600 dark:text-indigo-400 text-xl"></i><span class="font-bold text-gray-800 dark:text-white">${escapeHtml(mod.title)}</span></div>
+            <button data-copy-idx="${globalIdx}" class="copy-single text-xs px-3 py-1.5 rounded-lg font-medium shadow-sm"><i class="far fa-copy"></i> Copy</button>
+          </div>
+          <div class="p-4 bg-white/50 dark:bg-slate-900/20"><textarea data-mod-idx="${globalIdx}" rows="4" class="w-full text-sm font-mono p-2 rounded-lg border border-gray-300 dark:border-gray-600 resize-y bg-white dark:bg-slate-800 text-gray-800 dark:text-gray-200">${escapeHtml(mod.prompt)}</textarea></div>
+        `;
+        gridContainer.appendChild(card);
+      });
+      document.querySelectorAll(".copy-single").forEach(btn => {
+        btn.addEventListener("click", (e) => {
+          const idx = parseInt(btn.getAttribute("data-copy-idx"), 10);
+          const textarea = document.querySelector(`textarea[data-mod-idx="${idx}"]`);
+          copyToClipboard(textarea ? textarea.value : modules[idx]?.prompt, btn);
+        });
+      });
+      document.querySelectorAll("textarea[data-mod-idx]").forEach(ta => {
+        ta.addEventListener("input", (e) => {
+          const idx = parseInt(ta.getAttribute("data-mod-idx"), 10);
+          if (modules[idx]) modules[idx].prompt = ta.value;
+        });
+      });
+    }
+
+    function escapeHtml(str) { return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+
+    async function copyFilteredPrompts() {
+      const filtered = modules.filter(mod => {
+        const catMatch = currentBusiness === "all" || mod.categories.includes(currentBusiness);
+        const searchMatch = currentSearch === "" || mod.title.toLowerCase().includes(currentSearch.toLowerCase()) || mod.prompt.toLowerCase().includes(currentSearch.toLowerCase());
+        return catMatch && searchMatch;
+      });
+      let modText = filtered.map(m => `## ${m.title}\n${m.prompt}`).join("\n\n---\n\n");
+      const full = `# MASTER BLUEPRINT (Agency Suite)\n${masterTA.value}\n\n# FILTERED MODULES (${filtered.length})\n${modText}`;
+      await copyToClipboard(full);
+    }
+
+    function exportJSON() {
+      const data = {
+        master: masterTA.value,
+        modules: modules.map(({ title, prompt, categories }) => ({ title, prompt, categories })),
+        quickHelpers: { tech: quickTech.value, security: quickSec.value, aiScoring: quickAI.value }
+      };
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `agency_prompts_${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast("Exported JSON file");
+    }
+
+    // PDF Download (prints master + filtered modules)
+    function downloadAsPDF() {
+      const filtered = modules.filter(mod => {
+        const catMatch = currentBusiness === "all" || mod.categories.includes(currentBusiness);
+        const searchMatch = currentSearch === "" || mod.title.toLowerCase().includes(currentSearch.toLowerCase()) || mod.prompt.toLowerCase().includes(currentSearch.toLowerCase());
+        return catMatch && searchMatch;
+      });
+      let printHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head><title>AI Prompt Studio Export</title><meta charset="UTF-8"><style>
+          body { font-family: 'Inter', system-ui, sans-serif; margin: 0; padding: 20px; background: white; }
+          h1 { font-size: 28px; font-weight: 800; background: linear-gradient(120deg, #4f46e5, #a855f7); -webkit-background-clip: text; background-clip: text; color: transparent; }
+          h2 { font-size: 22px; margin-top: 28px; border-bottom: 2px solid #e2e8f0; padding-bottom: 6px; }
+          h3 { font-size: 18px; font-weight: 600; margin: 20px 0 8px; }
+          .prompt-box { white-space: pre-wrap; background: #f8fafc; border: 1px solid #e2e8f0; padding: 12px; border-radius: 12px; font-family: monospace; font-size: 13px; margin-bottom: 24px; page-break-inside: avoid; }
+          .date { color: #475569; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px; margin-bottom: 16px; }
+          @media print { body { margin: 0; padding: 10px; } .no-break { page-break-inside: avoid; } }
+        </style></head>
+        <body>
+          <h1>AI Prompt Studio – Agency v2</h1>
+          <div class="date">Generated on ${new Date().toLocaleString()}</div>
+          <h2>📌 Master Blueprint</h2>
+          <div class="prompt-box">${escapeHtml(masterTA.value)}</div>
+      `;
+      if (filtered.length > 0) {
+        printHtml += `<h2>📦 Modules (${filtered.length} visible)</h2>`;
+        filtered.forEach(mod => {
+          printHtml += `<h3>${escapeHtml(mod.title)}</h3><div class="prompt-box">${escapeHtml(mod.prompt)}</div>`;
+        });
+      }
+      printHtml += `</body></html>`;
+      const win = window.open('', '_blank');
+      win.document.write(printHtml);
+      win.document.close();
+      win.print();
+    }
+
+    // ------------------ FIREBASE CLOUD SYNC (optional) ------------------
+    // To enable cloud sync: 
+    // 1. Create a free Firebase project at https://firebase.google.com
+    // 2. Add a web app, copy the config object below.
+    // 3. Uncomment the block below and replace YOUR_* with actual keys.
+    // 4. Also uncomment the event listeners at the bottom.
+    /*
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+    
+    const firebaseConfig = {
+      apiKey: "YOUR_API_KEY",
+      authDomain: "YOUR_PROJECT.firebaseapp.com",
+      projectId: "YOUR_PROJECT_ID",
+      storageBucket: "YOUR_PROJECT.appspot.com",
+      messagingSenderId: "YOUR_SENDER_ID",
+      appId: "YOUR_APP_ID"
+    };
+    
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const userId = "defaultUser"; // change to email or unique ID for multi-device
+    
+    async function syncToCloud() {
+      const data = {
+        masterPrompt: masterTA.value,
+        modulePrompts: modules.map(m => m.prompt),
+        quickHelpers: { tech: quickTech.value, security: quickSec.value, aiScoring: quickAI.value },
+        businessContext: businessSelect.value,
+        darkMode: document.documentElement.classList.contains("dark")
+      };
+      await setDoc(doc(db, "users", userId), data);
+      showToast("☁️ Synced to Firebase Cloud!");
+    }
+    
+    async function loadFromCloud() {
+      const docRef = doc(db, "users", userId);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        masterTA.value = data.masterPrompt || DEFAULT_MASTER;
+        if (data.modulePrompts) modules.forEach((m, i) => m.prompt = data.modulePrompts[i]);
+        quickTech.value = data.quickHelpers?.tech || quickTech.value;
+        quickSec.value = data.quickHelpers?.security || quickSec.value;
+        quickAI.value = data.quickHelpers?.aiScoring || quickAI.value;
+        businessSelect.value = data.businessContext || "all";
+        currentBusiness = data.businessContext || "all";
+        if (data.darkMode) document.documentElement.classList.add("dark");
+        else document.documentElement.classList.remove("dark");
+        renderGrid();
+        showToast("☁️ Loaded from Firebase Cloud!");
+      } else showToast("No cloud data found. Save to cloud first.");
+    }
+    
+    document.getElementById("syncToCloudBtn").addEventListener("click", syncToCloud);
+    document.getElementById("loadFromCloudBtn").addEventListener("click", loadFromCloud);
+    */
+
+    // Show a message that cloud sync is disabled until user adds Firebase config
+    const syncCloudBtn = document.getElementById("syncToCloudBtn");
+    const loadCloudBtn = document.getElementById("loadFromCloudBtn");
+    if (syncCloudBtn && loadCloudBtn) {
+      syncCloudBtn.addEventListener("click", () => showToast("☁️ Firebase not configured. See instructions in HTML source."));
+      loadCloudBtn.addEventListener("click", () => showToast("☁️ Firebase not configured. See instructions in HTML source."));
+    }
+
+    const DEFAULT_MASTER = `# Full Agency Management Platform v2 – Master Specification
+
+## Core Features (26+ modules)
+- User System (Passkeys, MFA, RBAC)
+- Workspace (Multi-tenant ready)
+- AI Lead Scoring & Nurturing
+- Client Portal (branded)
+- CRM with Predictive Insights
+- Unlimited Clients & Projects
+- Service Management
+- Real-time Project & Task Mgmt (Agile/Waterfall + CRDTs)
+- Invoicing & Subscriptions (Stripe/PayPal)
+- Proposals + eSignature
+- AI Ticketing System
+- Custom Branding (white-label)
+- Time Tracking
+- File Feedback & Approval
+- Custom Forms Builder
+- AI Conversation Summaries
+- Custom Domain & Email
+- Slack Deep Integration
+- Custom Scripts (Sandbox)
+- API Key & Webhooks
+- App Embeds & Sidebar Customization
+- Analytics + AI Anomaly Detection
+
+## Tech Stack
+Next.js 15 + TypeScript + Tailwind + shadcn/ui  
+NestJS + PostgreSQL + Redis + WebSockets + Yjs (CRDTs)  
+Python FastAPI (AI microservice) + scikit-learn  
+Docker, Kubernetes (EKS), Terraform, GitHub Actions, Prometheus, Grafana
+
+## Security
+OWASP Top 10 (2026), CSP, HSTS, TLS 1.3, encryption at rest, Passkeys + MFA, RBAC.
+
+## DevOps
+GitOps (Argo CD), blue-green deployments, IaC, observability, DR backups.`;
+
+    masterTA.value = DEFAULT_MASTER;
+    quickTech.value = "Build NestJS + Next.js, PostgreSQL, Redis, WebSockets, Yjs real-time. Provide K8s + Terraform, CI/CD, OWASP security.";
+    quickSec.value = "Implement Passkeys (WebAuthn), MFA, RBAC, rate limiting, CSP, JWT rotation, audit logs, Vault. OWASP Top 10 2026, SIEM.";
+    quickAI.value = "AI lead scoring microservice (FastAPI + scikit-learn): lead_score, conversion_probability, churn_risk_score using historical CRM + engagement data.";
+
+    searchInput.addEventListener("input", (e) => { currentSearch = e.target.value; renderGrid(); });
+    clearSearchBtn.addEventListener("click", () => { searchInput.value = ""; currentSearch = ""; renderGrid(); });
+    applyBizBtn.addEventListener("click", applyBusinessContext);
+    copyFilteredBtn.addEventListener("click", copyFilteredPrompts);
+    exportBtn.addEventListener("click", exportJSON);
+    resetModulesBtn.addEventListener("click", resetModules);
+    copyMasterBtn.addEventListener("click", () => copyToClipboard(masterTA.value, copyMasterBtn));
+    resetMasterBtn.addEventListener("click", () => { masterTA.value = DEFAULT_MASTER; showToast("Master prompt reset"); });
+    document.getElementById("copyTechBtn").addEventListener("click", () => copyToClipboard(quickTech.value, document.getElementById("copyTechBtn")));
+    document.getElementById("copySecBtn").addEventListener("click", () => copyToClipboard(quickSec.value, document.getElementById("copySecBtn")));
+    document.getElementById("copyAiBtn").addEventListener("click", () => copyToClipboard(quickAI.value, document.getElementById("copyAiBtn")));
+    
+    saveStorageBtn.addEventListener("click", saveToLocalStorage);
+    loadStorageBtn.addEventListener("click", loadFromLocalStorage);
+    printPdfBtn.addEventListener("click", downloadAsPDF);
+
+    const isDark = localStorage.getItem("darkMode") === "true";
+    if (isDark) document.documentElement.classList.add("dark");
+    darkToggle.addEventListener("click", () => {
+      document.documentElement.classList.toggle("dark");
+      localStorage.setItem("darkMode", document.documentElement.classList.contains("dark"));
+    });
+    renderGrid();
+  </script>
+</body>
+</html>
